@@ -1,8 +1,11 @@
 ﻿using System.Runtime.InteropServices;
 using System.Reflection;
-using System.Drawing.Text;
 using System.Diagnostics;
-using System.Drawing.Drawing2D;
+using System.Drawing;
+using System.Windows.Forms;
+using System;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace WeSupport
 {
@@ -11,13 +14,8 @@ namespace WeSupport
         private Label questionLabel;
         private Button yesButton;
         private Button noButton;
-        private PictureBox logoPicture;
-        private Label loadingSvg;
-        private Label titleLabel;
-        private Panel questionPanel;
+        private RoundedPanel questionPanel;
 
-
-        // Zaokrąglenie rogów
         [DllImport("Gdi32.dll", EntryPoint = "CreateRoundRectRgn")]
         private static extern IntPtr CreateRoundRectRgn(
             int nLeftRect,
@@ -28,7 +26,6 @@ namespace WeSupport
             int nHeightEllipse
         );
 
-        // Przeciąganie okna
         public const int WM_NCLBUTTONDOWN = 0xA1;
         public const int HT_CAPTION = 0x2;
 
@@ -43,23 +40,14 @@ namespace WeSupport
             InitializeComponent();
             SetBackgroundImageFromResources();
             SetWindowIconFromResources();
-
-            this.Text = "WeSupport"; // Ustawienie tytułu okna
-
-            // Ukrycie paska tytułu
+            this.Text = "WeSupport";
             this.FormBorderStyle = FormBorderStyle.None;
             this.StartPosition = FormStartPosition.CenterScreen;
-
-            // Zaokrąglone rogi na starcie
             this.Region = Region.FromHrgn(CreateRoundRectRgn(0, 0, Width, Height, 30, 30));
-
-            // Obsługa przeciągania
             this.MouseDown += Form1_MouseDown;
-
-            this.Opacity = 0; // start z przezroczystości
+            this.Opacity = 0;
         }
 
-        // Obsługa przeciągania formularza myszką
         private void Form1_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
@@ -69,7 +57,6 @@ namespace WeSupport
             }
         }
 
-        // Ponowne zaokrąglenie rogów przy zmianie rozmiaru
         protected override void OnResize(EventArgs e)
         {
             base.OnResize(e);
@@ -79,13 +66,9 @@ namespace WeSupport
         protected override async void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-
-            SetupUI(); // przygotowanie layoutu
-
-            await Task.Delay(100); // krótki czas na pełne zrenderowanie
-
+            SetupUI();
+            await Task.Delay(100);
             this.Visible = true;
-
             var fadeTimer = new System.Windows.Forms.Timer { Interval = 30 };
             fadeTimer.Tick += (s, args) =>
             {
@@ -102,14 +85,12 @@ namespace WeSupport
             fadeTimer.Start();
         }
 
-
-        // Dodanie cienia pod oknem
         protected override CreateParams CreateParams
         {
             get
             {
                 CreateParams cp = base.CreateParams;
-                cp.ClassStyle |= 0x00020000; // CS_DROPSHADOW
+                cp.ClassStyle |= 0x00020000;
                 return cp;
             }
         }
@@ -138,53 +119,12 @@ namespace WeSupport
             }
         }
 
-        // Klasa przycisku z zaokrąglonymi rogami
-        public class RoundedButton : Button
-        {
-            public int CornerRadius { get; set; } = 18;
-            protected override void OnPaint(PaintEventArgs pevent)
-            {
-                base.OnPaint(pevent);
-                Rectangle rect = this.ClientRectangle;
-                using (GraphicsPath path = new GraphicsPath())
-                {
-                    path.AddArc(rect.X, rect.Y, CornerRadius, CornerRadius, 180, 90);
-                    path.AddArc(rect.Right - CornerRadius, rect.Y, CornerRadius, CornerRadius, 270, 90);
-                    path.AddArc(rect.Right - CornerRadius, rect.Bottom - CornerRadius, CornerRadius, CornerRadius, 0, 90);
-                    path.AddArc(rect.X, rect.Bottom - CornerRadius, CornerRadius, CornerRadius, 90, 90);
-                    path.CloseAllFigures();
-                    this.Region = new Region(path);
-                }
-            }
-        }
-
-        // Klasa panelu z zaokrąglonymi rogami
-        public class RoundedPanel : Panel
-        {
-            public int CornerRadius { get; set; } = 18;
-            protected override void OnPaint(PaintEventArgs e)
-            {
-                base.OnPaint(e);
-                using (GraphicsPath path = new GraphicsPath())
-                {
-                    Rectangle rect = this.ClientRectangle;
-                    path.AddArc(rect.X, rect.Y, CornerRadius, CornerRadius, 180, 90);
-                    path.AddArc(rect.Right - CornerRadius, rect.Y, CornerRadius, CornerRadius, 270, 90);
-                    path.AddArc(rect.Right - CornerRadius, rect.Bottom - CornerRadius, CornerRadius, CornerRadius, 0, 90);
-                    path.AddArc(rect.X, rect.Bottom - CornerRadius, CornerRadius, CornerRadius, 90, 90);
-                    path.CloseAllFigures();
-                    this.Region = new Region(path);
-                }
-            }
-        }
-
         private void SetupUI()
         {
-            // 1. Panel z pytaniem
             questionPanel = new RoundedPanel
             {
                 BackColor = Color.Black,
-                Size = new Size(520, 56), // większy panel, aby tekst się mieścił
+                Size = new Size(520, 56),
                 Height = 56,
                 Width = 520,
                 Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right,
@@ -195,7 +135,7 @@ namespace WeSupport
             questionLabel = new Label
             {
                 Text = "CZY MOŻEMY PODŁĄCZYĆ SIĘ ZDALNIE?",
-                Font = LoadFont("WeSupport.Assets.Poppins_Bold.ttf", 18f), // mniejsza czcionka
+                Font = FontHelper.LoadFont("WeSupport.Assets.Poppins_Bold.ttf", 18f),
                 ForeColor = Color.White,
                 BackColor = Color.Transparent,
                 AutoSize = false,
@@ -204,15 +144,14 @@ namespace WeSupport
             };
             questionPanel.Controls.Add(questionLabel);
 
-            // 2. Przyciski TAK/NIE
             yesButton = new RoundedButton
             {
                 Text = "TAK",
-                Font = LoadFont("WeSupport.Assets.Poppins_Bold.ttf", 18f, FontStyle.Bold), // mniejsza czcionka
+                Font = FontHelper.LoadFont("WeSupport.Assets.Poppins_Bold.ttf", 18f, FontStyle.Bold),
                 BackColor = Color.White,
                 ForeColor = Color.Black,
                 FlatStyle = FlatStyle.Flat,
-                Size = new Size(110, 48), // mniejszy rozmiar
+                Size = new Size(110, 48),
                 Cursor = Cursors.Hand,
                 CornerRadius = 18
             };
@@ -222,11 +161,11 @@ namespace WeSupport
             noButton = new RoundedButton
             {
                 Text = "NIE",
-                Font = LoadFont("WeSupport.Assets.Poppins_Bold.ttf", 18f, FontStyle.Bold), // mniejsza czcionka
+                Font = FontHelper.LoadFont("WeSupport.Assets.Poppins_Bold.ttf", 18f, FontStyle.Bold),
                 BackColor = Color.White,
                 ForeColor = Color.Black,
                 FlatStyle = FlatStyle.Flat,
-                Size = new Size(110, 48), // mniejszy rozmiar
+                Size = new Size(110, 48),
                 Cursor = Cursors.Hand,
                 CornerRadius = 18
             };
@@ -247,36 +186,13 @@ namespace WeSupport
             int marginRight = 80;
             int marginBottom = 100;
             int spacing = 30;
-
-            // Panel z pytaniem - prawa dolna część okna
             questionPanel.Left = this.ClientSize.Width - questionPanel.Width - marginRight;
             questionPanel.Top = this.ClientSize.Height - questionPanel.Height - marginBottom - yesButton.Height - spacing;
-
-            // Przyciski - pod panelem, wyrównane do prawej
             int totalWidth = yesButton.Width + spacing + noButton.Width;
             int startX = questionPanel.Left + questionPanel.Width / 2 - totalWidth / 2;
             int buttonsTop = questionPanel.Bottom + spacing;
             yesButton.Location = new Point(startX, buttonsTop);
             noButton.Location = new Point(startX + yesButton.Width + spacing, buttonsTop);
-        }
-
-        private Font LoadFont(string resourcePath, float size, FontStyle style = FontStyle.Regular)
-        {
-            var fontCollection = new PrivateFontCollection();
-            using (Stream fontStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourcePath))
-            {
-                byte[] fontData = new byte[fontStream.Length];
-                fontStream.Read(fontData, 0, (int)fontStream.Length);
-                unsafe
-                {
-                    fixed (byte* pFontData = fontData)
-                    {
-                        fontCollection.AddMemoryFont((IntPtr)pFontData, fontData.Length);
-                    }
-                }
-            }
-
-            return new Font(fontCollection.Families[0], size, style);
         }
 
         private async void YesButton_Click(object sender, EventArgs e)
@@ -285,11 +201,10 @@ namespace WeSupport
             yesButton.Visible = false;
             noButton.Visible = false;
 
-            // Wyświetl napis 'Zaraz zaczynamy..' w panelu z pytaniem
             Label startingLabel = new Label
             {
-                Text = "Zaraz zaczynamy..",
-                Font = LoadFont("WeSupport.Assets.Poppins_Bold.ttf", 18f),
+                Text = "Zaraz zaczynamy...",
+                Font = FontHelper.LoadFont("WeSupport.Assets.Poppins_Bold.ttf", 18f),
                 ForeColor = Color.White,
                 BackColor = Color.Transparent,
                 AutoSize = false,
@@ -299,103 +214,12 @@ namespace WeSupport
             questionPanel.Controls.Add(startingLabel);
             startingLabel.BringToFront();
 
-            // pobieranie i uruchamianie pliku WeSupport_Lite.exe
             string url = "https://www.we-support.pl/app/WeSupport_Lite.exe";
             string userDir = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
             string wesupportDir = Path.Combine(userDir, "WeSupport");
             Directory.CreateDirectory(wesupportDir);
-
             string exePath = Path.Combine(wesupportDir, "WeSupport_Lite.exe");
-
-            using (var client = new HttpClient())
-            {
-                try
-                {
-                    var data = await client.GetByteArrayAsync(url);
-                    // plik już istniał, nadpisz
-                    if (File.Exists(exePath))
-                    {
-                        File.Delete(exePath);
-                    }
-                    await File.WriteAllBytesAsync(exePath, data);
-
-                    // Tworzenie skrótu na pulpicie
-                    CreateShortcut(exePath);
-
-                    // Uruchomienie aplikacji
-                    Process.Start(exePath);
-                    Application.Exit();
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Błąd pobierania lub uruchamiania pliku: " + ex.Message);
-                }
-            }
+            await DownloadHelper.DownloadAndRunAsync(url, exePath, err => MessageBox.Show(err));
         }
-
-        private void CreateShortcut(string targetExePath)
-        {
-            string shortcutName = "WeSupport.lnk";
-            string desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-            string shortcutPath = Path.Combine(desktopPath, shortcutName);
-
-            // Nadpisanie istniejącego skrótu
-            if (File.Exists(shortcutPath))
-            {
-                File.Delete(shortcutPath);
-            }
-
-            string iconPath = ExtractIconFromResources();
-
-            string powershellCommand = $@"
-$WshShell = New-Object -ComObject WScript.Shell;
-$Shortcut = $WshShell.CreateShortcut('{shortcutPath}');
-$Shortcut.TargetPath = '{targetExePath}';
-$Shortcut.WorkingDirectory = '{Path.GetDirectoryName(targetExePath)}';
-$Shortcut.WindowStyle = 1;
-$Shortcut.IconLocation = '{iconPath}';
-$Shortcut.Description = 'WeSupport aplikacja zdalna';
-$Shortcut.Save();";
-
-
-            var psi = new ProcessStartInfo
-            {
-                FileName = "powershell.exe",
-                Arguments = $"-NoProfile -ExecutionPolicy Bypass -Command \"{powershellCommand}\"",
-                UseShellExecute = false,
-                CreateNoWindow = true
-            };
-
-            try
-            {
-                Process.Start(psi);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Błąd tworzenia skrótu: " + ex.Message);
-            }
-        }
-        private string ExtractIconFromResources()
-        {
-            string wesupportDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "WeSupport");
-            Directory.CreateDirectory(wesupportDir);
-
-            string iconPath = Path.Combine(wesupportDir, "shortcut_icon.ico");
-
-            using (Stream iconStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("WeSupport.Assets.ikona.ico"))
-            {
-                if (iconStream != null)
-                {
-                    using (FileStream fileStream = new FileStream(iconPath, FileMode.Create, FileAccess.Write))
-                    {
-                        iconStream.CopyTo(fileStream);
-                    }
-                }
-            }
-
-            return iconPath;
-        }
-
-
     }
 }
