@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "WeSupport": {
+      "commandName": "Project",
+      "remoteDebugEnabled": false
+    }
+  }
+}
