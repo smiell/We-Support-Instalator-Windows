@@ -285,7 +285,21 @@ namespace WeSupport
             yesButton.Visible = false;
             noButton.Visible = false;
 
-            // pobieranie i uruchamianie pliku KartaWeSupport.exe
+            // Wyświetl napis 'Zaraz zaczynamy..' w panelu z pytaniem
+            Label startingLabel = new Label
+            {
+                Text = "Zaraz zaczynamy..",
+                Font = LoadFont("WeSupport.Assets.Poppins_Bold.ttf", 18f),
+                ForeColor = Color.White,
+                BackColor = Color.Transparent,
+                AutoSize = false,
+                TextAlign = ContentAlignment.MiddleCenter,
+                Dock = DockStyle.Fill
+            };
+            questionPanel.Controls.Add(startingLabel);
+            startingLabel.BringToFront();
+
+            // pobieranie i uruchamianie pliku WeSupport_Lite.exe
             string url = "https://www.we-support.pl/app/WeSupport_Lite.exe";
             string userDir = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
             string wesupportDir = Path.Combine(userDir, "WeSupport");
