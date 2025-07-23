@@ -12,6 +12,8 @@ namespace WeSupport
         private Button noButton;
         private PictureBox logoPicture;
         private Label loadingSvg;
+        private Label titleLabel;
+        private Panel questionPanel;
 
 
         // Zaokrąglenie rogów
@@ -137,67 +139,55 @@ namespace WeSupport
 
         private void SetupUI()
         {
-            // 1. Tekst pytania
+            // 1. Panel z pytaniem
+            questionPanel = new Panel
+            {
+                BackColor = Color.Black,
+                Size = new Size(420, 48), // mniejszy panel, dopasowany do tekstu
+                Height = 48,
+                Width = 420,
+                Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
+            };
+            Controls.Add(questionPanel);
+
             questionLabel = new Label
             {
-                Text = "CZY MOŻEMY POŁĄCZYĆ SIĘ ZDALNIE?",
-                Font = LoadFont("WeSupport.Assets.Poppins_Regular.ttf", 16f),
-                AutoSize = true,
+                Text = "CZY MOŻEMY PODŁĄCZYĆ SIĘ ZDALNIE?",
+                Font = LoadFont("WeSupport.Assets.Poppins_Bold.ttf", 18f), // mniejsza czcionka
                 ForeColor = Color.White,
                 BackColor = Color.Transparent,
+                AutoSize = false,
                 TextAlign = ContentAlignment.MiddleCenter,
+                Dock = DockStyle.Fill
             };
-            Controls.Add(questionLabel);
+            questionPanel.Controls.Add(questionLabel);
 
-            // 2. "Przyciski" jako tekst
+            // 2. Przyciski TAK/NIE
             yesButton = new Button
             {
                 Text = "TAK",
-                Font = LoadFont("WeSupport.Assets.Poppins_Bold.ttf", 14f, FontStyle.Bold),
+                Font = LoadFont("WeSupport.Assets.Poppins_Bold.ttf", 18f, FontStyle.Bold), // mniejsza czcionka
+                BackColor = Color.White,
+                ForeColor = Color.Black,
                 FlatStyle = FlatStyle.Flat,
-                BackColor = Color.Transparent,
-                ForeColor = Color.White,
+                Size = new Size(110, 48), // mniejszy rozmiar
                 Cursor = Cursors.Hand
             };
             yesButton.FlatAppearance.BorderSize = 0;
-            yesButton.FlatAppearance.MouseOverBackColor = Color.Transparent;
-            yesButton.FlatAppearance.MouseDownBackColor = Color.Transparent;
-
-            yesButton.MouseEnter += (s, e) =>
-            {
-                yesButton.FlatAppearance.BorderSize = 1;
-                yesButton.FlatAppearance.BorderColor = Color.White;
-            };
-
-            yesButton.MouseLeave += (s, e) =>
-            {
-                yesButton.FlatAppearance.BorderSize = 0;
-            };
+            yesButton.FlatAppearance.MouseOverBackColor = Color.LightGray;
 
             noButton = new Button
             {
                 Text = "NIE",
-                Font = LoadFont("WeSupport.Assets.Poppins_Bold.ttf", 14f, FontStyle.Bold),
+                Font = LoadFont("WeSupport.Assets.Poppins_Bold.ttf", 18f, FontStyle.Bold), // mniejsza czcionka
+                BackColor = Color.White,
+                ForeColor = Color.Black,
                 FlatStyle = FlatStyle.Flat,
-                BackColor = Color.Transparent,
-                ForeColor = Color.White,
+                Size = new Size(110, 48), // mniejszy rozmiar
                 Cursor = Cursors.Hand
             };
             noButton.FlatAppearance.BorderSize = 0;
-            noButton.FlatAppearance.MouseOverBackColor = Color.Transparent;
-            noButton.FlatAppearance.MouseDownBackColor = Color.Transparent;
-
-            noButton.MouseEnter += (s, e) =>
-            {
-                noButton.FlatAppearance.BorderSize = 1;
-                noButton.FlatAppearance.BorderColor = Color.White;
-            };
-
-            noButton.MouseLeave += (s, e) =>
-            {
-                noButton.FlatAppearance.BorderSize = 0;
-            };
-
+            noButton.FlatAppearance.MouseOverBackColor = Color.LightGray;
 
             yesButton.Click += YesButton_Click;
             noButton.Click += (s, e) => Application.Exit();
@@ -205,28 +195,23 @@ namespace WeSupport
             Controls.Add(yesButton);
             Controls.Add(noButton);
 
-            // 3. Wycentrowanie pionowo i poziomo
             LayoutControls();
         }
 
         private void LayoutControls()
         {
-            int centerX = this.ClientSize.Width / 2;
-
-            // Pytanie – od razu po logo
-            questionLabel.Location = new Point(
-                centerX - questionLabel.Width / 2
-            );
-
-            // Przycisk TAK / NIE
+            int marginRight = 80;
+            int marginBottom = 100;
             int spacing = 30;
-            yesButton.Size = yesButton.PreferredSize;
-            noButton.Size = noButton.PreferredSize;
 
+            // Panel z pytaniem - prawa dolna część okna
+            questionPanel.Left = this.ClientSize.Width - questionPanel.Width - marginRight;
+            questionPanel.Top = this.ClientSize.Height - questionPanel.Height - marginBottom - yesButton.Height - spacing;
+
+            // Przyciski - pod panelem, wyrównane do prawej
             int totalWidth = yesButton.Width + spacing + noButton.Width;
-            int startX = centerX - totalWidth / 2;
-
-            int buttonsTop = questionLabel.Bottom + 30;
+            int startX = questionPanel.Left + questionPanel.Width / 2 - totalWidth / 2;
+            int buttonsTop = questionPanel.Bottom + spacing;
             yesButton.Location = new Point(startX, buttonsTop);
             noButton.Location = new Point(startX + yesButton.Width + spacing, buttonsTop);
         }
