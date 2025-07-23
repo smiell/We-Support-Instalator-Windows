@@ -137,29 +137,7 @@ namespace WeSupport
 
         private void SetupUI()
         {
-            // 1. Logo aplikacji
-            logoPicture = new PictureBox
-            {
-                SizeMode = PictureBoxSizeMode.Zoom,
-                Size = new Size(400, 100),
-                BackColor = Color.Transparent
-            };
-
-            using (Stream logoStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("WeSupport.Assets.Logo_WeSupport_biale.png"))
-            {
-                if (logoStream != null)
-                {
-                    logoPicture.Image = new Bitmap(logoStream);
-                }
-                else
-                {
-                    MessageBox.Show("Brak zasobu: Logo_WeSupport_biale.png");
-                }
-            }
-
-            Controls.Add(logoPicture);
-
-            // 2. Tekst pytania
+            // 1. Tekst pytania
             questionLabel = new Label
             {
                 Text = "CZY MOŻEMY POŁĄCZYĆ SIĘ ZDALNIE?",
@@ -171,7 +149,7 @@ namespace WeSupport
             };
             Controls.Add(questionLabel);
 
-            // 3. "Przyciski" jako tekst
+            // 2. "Przyciski" jako tekst
             yesButton = new Button
             {
                 Text = "TAK",
@@ -227,7 +205,7 @@ namespace WeSupport
             Controls.Add(yesButton);
             Controls.Add(noButton);
 
-            // 4. Wycentrowanie pionowo i poziomo
+            // 3. Wycentrowanie pionowo i poziomo
             LayoutControls();
         }
 
@@ -235,13 +213,9 @@ namespace WeSupport
         {
             int centerX = this.ClientSize.Width / 2;
 
-            // Logo
-            logoPicture.Location = new Point(centerX - logoPicture.Width / 2, 80);
-
             // Pytanie – od razu po logo
             questionLabel.Location = new Point(
-                centerX - questionLabel.Width / 2,
-                logoPicture.Bottom + 80
+                centerX - questionLabel.Width / 2
             );
 
             // Przycisk TAK / NIE

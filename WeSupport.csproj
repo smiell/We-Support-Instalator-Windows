@@ -13,7 +13,6 @@
   <ItemGroup>
     <None Remove="Assets\background.png" />
     <None Remove="Assets\ikona.ico" />
-    <None Remove="Assets\Logo_WeSupport_biale.png" />
     <None Remove="Assets\Poppins_Bold.ttf" />
     <None Remove="Assets\Poppins_Regular.ttf" />
   </ItemGroup>
@@ -21,7 +20,6 @@
   <ItemGroup>
     <EmbeddedResource Include="Assets\background.png" />
     <EmbeddedResource Include="Assets\ikona.ico" />
-    <EmbeddedResource Include="Assets\Logo_WeSupport_biale.png" />
     <EmbeddedResource Include="Assets\Poppins_Bold.ttf" />
     <EmbeddedResource Include="Assets\Poppins_Regular.ttf" />
   </ItemGroup>
