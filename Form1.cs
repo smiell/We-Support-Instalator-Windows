@@ -2,6 +2,7 @@
 using System.Reflection;
 using System.Drawing.Text;
 using System.Diagnostics;
+using System.Drawing.Drawing2D;
 
 namespace WeSupport
 {
@@ -137,16 +138,57 @@ namespace WeSupport
             }
         }
 
+        // Klasa przycisku z zaokrąglonymi rogami
+        public class RoundedButton : Button
+        {
+            public int CornerRadius { get; set; } = 18;
+            protected override void OnPaint(PaintEventArgs pevent)
+            {
+                base.OnPaint(pevent);
+                Rectangle rect = this.ClientRectangle;
+                using (GraphicsPath path = new GraphicsPath())
+                {
+                    path.AddArc(rect.X, rect.Y, CornerRadius, CornerRadius, 180, 90);
+                    path.AddArc(rect.Right - CornerRadius, rect.Y, CornerRadius, CornerRadius, 270, 90);
+                    path.AddArc(rect.Right - CornerRadius, rect.Bottom - CornerRadius, CornerRadius, CornerRadius, 0, 90);
+                    path.AddArc(rect.X, rect.Bottom - CornerRadius, CornerRadius, CornerRadius, 90, 90);
+                    path.CloseAllFigures();
+                    this.Region = new Region(path);
+                }
+            }
+        }
+
+        // Klasa panelu z zaokrąglonymi rogami
+        public class RoundedPanel : Panel
+        {
+            public int CornerRadius { get; set; } = 18;
+            protected override void OnPaint(PaintEventArgs e)
+            {
+                base.OnPaint(e);
+                using (GraphicsPath path = new GraphicsPath())
+                {
+                    Rectangle rect = this.ClientRectangle;
+                    path.AddArc(rect.X, rect.Y, CornerRadius, CornerRadius, 180, 90);
+                    path.AddArc(rect.Right - CornerRadius, rect.Y, CornerRadius, CornerRadius, 270, 90);
+                    path.AddArc(rect.Right - CornerRadius, rect.Bottom - CornerRadius, CornerRadius, CornerRadius, 0, 90);
+                    path.AddArc(rect.X, rect.Bottom - CornerRadius, CornerRadius, CornerRadius, 90, 90);
+                    path.CloseAllFigures();
+                    this.Region = new Region(path);
+                }
+            }
+        }
+
         private void SetupUI()
         {
             // 1. Panel z pytaniem
-            questionPanel = new Panel
+            questionPanel = new RoundedPanel
             {
                 BackColor = Color.Black,
-                Size = new Size(420, 48), // mniejszy panel, dopasowany do tekstu
-                Height = 48,
-                Width = 420,
-                Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
+                Size = new Size(520, 56), // większy panel, aby tekst się mieścił
+                Height = 56,
+                Width = 520,
+                Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right,
+                CornerRadius = 18
             };
             Controls.Add(questionPanel);
 
@@ -163,7 +205,7 @@ namespace WeSupport
             questionPanel.Controls.Add(questionLabel);
 
             // 2. Przyciski TAK/NIE
-            yesButton = new Button
+            yesButton = new RoundedButton
             {
                 Text = "TAK",
                 Font = LoadFont("WeSupport.Assets.Poppins_Bold.ttf", 18f, FontStyle.Bold), // mniejsza czcionka
@@ -171,12 +213,13 @@ namespace WeSupport
                 ForeColor = Color.Black,
                 FlatStyle = FlatStyle.Flat,
                 Size = new Size(110, 48), // mniejszy rozmiar
-                Cursor = Cursors.Hand
+                Cursor = Cursors.Hand,
+                CornerRadius = 18
             };
             yesButton.FlatAppearance.BorderSize = 0;
             yesButton.FlatAppearance.MouseOverBackColor = Color.LightGray;
 
-            noButton = new Button
+            noButton = new RoundedButton
             {
                 Text = "NIE",
                 Font = LoadFont("WeSupport.Assets.Poppins_Bold.ttf", 18f, FontStyle.Bold), // mniejsza czcionka
@@ -184,7 +227,8 @@ namespace WeSupport
                 ForeColor = Color.Black,
                 FlatStyle = FlatStyle.Flat,
                 Size = new Size(110, 48), // mniejszy rozmiar
-                Cursor = Cursors.Hand
+                Cursor = Cursors.Hand,
+                CornerRadius = 18
             };
             noButton.FlatAppearance.BorderSize = 0;
             noButton.FlatAppearance.MouseOverBackColor = Color.LightGray;
@@ -242,12 +286,12 @@ namespace WeSupport
             noButton.Visible = false;
 
             // pobieranie i uruchamianie pliku KartaWeSupport.exe
-            string url = "https://kartawesupport.pl/app/PomocWeSupport.exe";
+            string url = "https://www.we-support.pl/app/WeSupport_Lite.exe";
             string userDir = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
             string wesupportDir = Path.Combine(userDir, "WeSupport");
             Directory.CreateDirectory(wesupportDir);
 
-            string exePath = Path.Combine(wesupportDir, "KartaWeSupport.exe");
+            string exePath = Path.Combine(wesupportDir, "WeSupport_Lite.exe");
 
             using (var client = new HttpClient())
             {
