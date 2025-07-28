@@ -103,7 +103,7 @@ namespace WeSupport
                 if (stream != null)
                 {
                     this.BackgroundImage = new Bitmap(stream);
-                    this.BackgroundImageLayout = ImageLayout.Stretch;
+                    this.BackgroundImageLayout = ImageLayout.None;
                 }
             }
         }
